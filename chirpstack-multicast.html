@@ -1,0 +1,149 @@
+<!-- Configuration du serveur ChirpStack -->
+<script type="text/javascript">
+    RED.nodes.registerType('chirpstack-server-multicast', {
+        category: 'config',
+        defaults: {
+            name: {value: ""},
+            server: {value: "localhost:8080", required: true}
+        },
+        credentials: {
+            apiToken: {type: "password", required: true}
+        },
+        label: function() {
+            return this.name || "ChirpStack Server";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="chirpstack-server-multicast">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Nom</label>
+        <input type="text" id="node-config-input-name" placeholder="ChirpStack Server">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-server"><i class="fa fa-server"></i> Serveur</label>
+        <input type="text" id="node-config-input-server" placeholder="localhost:8080">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-apiToken"><i class="fa fa-key"></i> API Token</label>
+        <input type="password" id="node-config-input-apiToken">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="chirpstack-server-multicast">
+    <p>Configuration de connexion au serveur ChirpStack.</p>
+    <h3>Paramètres</h3>
+    <dl class="message-properties">
+        <dt>Serveur <span class="property-type">string</span></dt>
+        <dd>Adresse du serveur ChirpStack (ex: localhost:8080)</dd>
+        <dt>API Token <span class="property-type">string</span></dt>
+        <dd>Token d'authentification API ChirpStack</dd>
+    </dl>
+</script>
+
+<!-- Nœud Multicast Downlink -->
+<script type="text/javascript">
+    RED.nodes.registerType('chirpstack-multicast', {
+        category: 'chirpstack',
+        color: '#00B0B0',
+        defaults: {
+            name: {value: ""},
+            server: {value: "", type: "chirpstack-server-multicast", required: true},
+            multicastGroupId: {value: ""},
+            fPort: {value: 10, validate: RED.validators.number()},
+            debug: {value: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "bridge.png",
+        label: function() {
+            return this.name || "multicast downlink";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="chirpstack-multicast">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Nom</label>
+        <input type="text" id="node-input-name" placeholder="Multicast Downlink">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Serveur</label>
+        <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row">
+        <label for="node-input-multicastGroupId"><i class="fa fa-users"></i> Group ID</label>
+        <input type="text" id="node-input-multicastGroupId" placeholder="4820fc7f-0579-46a6-a67f-96d46e2c0cd7">
+        <span class="form-tips">Optionnel - peut être fourni via msg.multicastGroupId</span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-fPort"><i class="fa fa-hashtag"></i> fPort</label>
+        <input type="number" id="node-input-fPort" placeholder="10" min="1" max="223">
+        <span class="form-tips">Optionnel - peut être fourni via msg.fPort</span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-debug"><i class="fa fa-bug"></i> Debug</label>
+        <input type="checkbox" id="node-input-debug" style="width: auto;">
+        <span class="form-tips">Afficher les logs de debug</span>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="chirpstack-multicast">
+    <p>Envoie un downlink multicast vers un groupe de devices ChirpStack.</p>
+    
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">buffer | string | object</span></dt>
+        <dd>Les données à envoyer (Buffer, hex, base64 ou texte)</dd>
+        
+        <dt class="optional">multicastGroupId <span class="property-type">string</span></dt>
+        <dd>ID du groupe multicast (si non configuré dans le nœud)</dd>
+        
+        <dt class="optional">fPort <span class="property-type">number</span></dt>
+        <dd>Port applicatif LoRaWAN (1-223, défaut: 10)</dd>
+    </dl>
+
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>
+            <code>success</code>: true/false<br>
+            <code>fCnt</code>: Frame counter<br>
+            <code>multicastGroupId</code>: ID du groupe<br>
+            <code>timestamp</code>: Horodatage
+        </dd>
+    </dl>
+
+    <h3>Exemples</h3>
+    <h4>Exemple 1 : Données en hex</h4>
+    <pre>
+msg.multicastGroupId = "4820fc7f-0579-46a6-a67f-96d46e2c0cd7";
+msg.fPort = 10;
+msg.payload = "48656C6C6F";  // "Hello" en hex
+return msg;
+    </pre>
+
+    <h4>Exemple 2 : Buffer directement</h4>
+    <pre>
+msg.payload = Buffer.from("Hello World");
+return msg;
+    </pre>
+
+    <h4>Exemple 3 : Avec Cayenne LPP</h4>
+    <pre>
+const buf = Buffer.alloc(4);
+buf[0] = 1;     // Channel
+buf[1] = 0x67;  // Temperature
+buf[2] = 0x01;  // 25.6°C
+buf[3] = 0x00;
+msg.payload = buf;
+return msg;
+    </pre>
+
+    <h3>Détails</h3>
+    <p>Ce nœud utilise l'API gRPC de ChirpStack v4 pour envoyer des downlinks multicast.</p>
+    <p>Les devices doivent être en Class C et membre du groupe multicast.</p>
+</script>
