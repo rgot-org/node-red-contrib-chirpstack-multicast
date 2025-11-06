@@ -1,5 +1,9 @@
 # node-red-contrib-chirpstack-multicast
 
+[![npm version](https://badge.fury.io/js/node-red-contrib-chirpstack-multicast.svg)](https://badge.fury.io/js/node-red-contrib-chirpstack-multicast)
+[![npm downloads](https://img.shields.io/npm/dm/node-red-contrib-chirpstack-multicast.svg)](https://www.npmjs.com/package/node-red-contrib-chirpstack-multicast)
+[![GitHub license](https://img.shields.io/github/license/rgot-org/node-red-contrib-chirpstack-multicast.svg)](https://github.com/rgot-org/node-red-contrib-chirpstack-multicast/blob/main/LICENSE)
+
 Node-RED node for sending multicast downlinks to ChirpStack v4 LoRaWAN network server.
 This node was generated using claude.ai
 
@@ -250,11 +254,11 @@ MIT License - see LICENSE file for details
 
 ## Author
 
-Votre Nom
+Francois Riotte
 
 ## Links
 
-- [GitHub Repository](https://github.com/votre-username/node-red-contrib-chirpstack-multicast)
+- [GitHub Repository](https://github.com/rgot-org/node-red-contrib-chirpstack-multicast)
 - [npm Package](https://www.npmjs.com/package/node-red-contrib-chirpstack-multicast)
 - [ChirpStack Documentation](https://www.chirpstack.io/docs/)
 - [Node-RED](https://nodered.org/)
